@@ -10,46 +10,43 @@ interface Post {
 }
 
 function App() {
-  const [error, setError] = useState();
-  const [isLoading, setIsLoading] = useState(false);
-  const [posts, setPosts] = useState<Post[]>([]);
+  const [isLoading, setIsLoading] = useState(false)
+  const [isError, setIsError] = useState<Error | string>();
+  const [posts, setPosts] = useState<Post[]>([])
 
   useEffect(() => {
-    const fetchData = async () => {
-      setIsLoading(true);
-
-      try {
+    const getPosts = async () => {
+      setIsLoading(true)
+      try{
         const response = await fetch(`${BASE_URL}/posts`);
         const posts = (await response.json()) as Post[];
         setPosts(posts);
-      } catch (error: any) {
-        setError(error);
+      } catch(error){
+        if(error instanceof Error) {
+          setIsError(error.message)
+        }
       } finally {
         setIsLoading(false);
       }
-    };
+    }
 
-    fetchData();
-  }, []);
+    getPosts()
+  }, [])
 
-  if(error) {
-    return <div><h1>404 - There was an unexpected Error...!</h1></div>
+  if(isError) {
+    return <div>There was an unexpected error, try again....</div>
   }
 
-  if (isLoading) {
-    return <div>Data loading...</div>;
+  if(isLoading) {
+    return <div>Lists are loading...</div>
   }
 
   return (
     <>
-      <div className="tutorial">
-        <h1>Lets Fetch these Data</h1>
-        <ul>
-          {posts.map((post) => {
-            return <li key={post.id}>{post.title}</li>;
-          })}
-        </ul>
-      </div>
+      <h3>The Lists of Tasks</h3>
+      <ul>{posts.map((post) => {
+        return <li key={post.id}>{post.title}</li>
+      })}</ul>
     </>
   );
 }
